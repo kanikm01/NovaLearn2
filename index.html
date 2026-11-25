@@ -1,0 +1,893 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#5d4cdd">
+<title>NovaLearn | Learn Smarter</title>
+<style>
+:root {
+  --bg:#f5f7fc; --surface:#fff; --text:#17213a; --muted:#75809a;
+  --primary:#6558e8; --light:#eeecff; --border:#e8eaf2;
+  --green:#159b70; --orange:#ed9841; --red:#e35b68;
+}
+* { box-sizing:border-box; }
+body { margin:0; font-family:Inter,Arial,sans-serif; background:var(--bg); color:var(--text); }
+button,input,select { font:inherit; }
+button { cursor:pointer; }
+.app { display:flex; min-height:100vh; }
+.sidebar {
+  width:245px; background:#fff; border-right:1px solid var(--border);
+  padding:25px 17px; position:fixed; inset:0 auto 0 0; z-index:5;
+  display:flex; flex-direction:column;
+}
+.logo { font-size:25px; font-weight:850; letter-spacing:-1px; padding:5px 10px 28px; }
+.logo span { color:var(--primary); }
+.nav-label { font-size:10px; color:var(--muted); font-weight:800; letter-spacing:1.5px; padding:12px 12px 8px; }
+.nav-btn {
+  border:0; background:transparent; color:#69748d; padding:12px;
+  text-align:left; border-radius:10px; margin:2px 0; width:100%;
+  font-size:14px; font-weight:650;
+}
+.nav-btn:hover,.nav-btn.active { background:var(--light); color:var(--primary); }
+.sidebar-bottom { margin-top:auto; background:#f7f6ff; border-radius:14px; padding:15px; font-size:12px; color:var(--muted); line-height:1.6; }
+.main { margin-left:245px; width:calc(100% - 245px); padding:28px 4%; max-width:1600px; }
+.topbar { display:flex; align-items:center; justify-content:space-between; gap:15px; margin-bottom:30px; }
+.topbar h1 { font-size:25px; margin:0; }
+.topbar p { margin:6px 0 0; color:var(--muted); font-size:13px; }
+.top-actions { display:flex; align-items:center; gap:10px; }
+select,.search {
+  border:1px solid var(--border); background:white; border-radius:10px;
+  padding:11px 13px; color:var(--text); outline:none;
+}
+.search { width:100%; max-width:340px; }
+select:focus,input:focus { border-color:var(--primary); }
+.stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:15px; margin-bottom:25px; }
+.stat,.panel,.subject-card,.topic-card,.lesson-card,.tip-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:16px;
+}
+.stat { padding:19px; }
+.stat-label { color:var(--muted); font-size:12px; }
+.stat-value { font-size:26px; font-weight:800; margin:9px 0 4px; }
+.stat-note { font-size:11px; color:var(--muted); }
+.section-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:28px 0 15px; }
+.section-head h2 { font-size:18px; margin:0; }
+.section-head p { color:var(--muted); font-size:12px; margin:5px 0 0; }
+.subject-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:15px; }
+.subject-card { padding:19px; cursor:pointer; transition:.2s; }
+.subject-card:hover { transform:translateY(-3px); border-color:#b9b2ff; }
+.subject-icon { font-size:26px; margin-bottom:12px; }
+.subject-card h3 { margin:0 0 6px; font-size:16px; }
+.subject-card p { color:var(--muted); font-size:12px; margin:0 0 15px; }
+.progress-track { height:7px; border-radius:20px; background:#edf0f6; overflow:hidden; }
+.progress-fill { height:100%; background:var(--primary); border-radius:20px; }
+.progress-caption { display:flex; justify-content:space-between; color:var(--muted); font-size:11px; margin-top:8px; }
+.panel { padding:22px; margin-bottom:18px; }
+.page { display:none; }
+.page.active { display:block; }
+.back { border:0; background:transparent; color:var(--primary); padding:0; font-weight:700; margin-bottom:18px; }
+.topic-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.topic-card { padding:16px; display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:pointer; }
+.topic-card:hover { border-color:#b9b2ff; }
+.topic-card h3 { font-size:14px; margin:0 0 5px; }
+.topic-card p { font-size:11px; color:var(--muted); margin:0; }
+.topic-number { width:32px; height:32px; flex-shrink:0; display:grid; place-items:center; background:var(--light); color:var(--primary); border-radius:10px; font-weight:800; }
+.tag { font-size:10px; padding:5px 8px; border-radius:20px; background:#e8f7f1; color:var(--green); white-space:nowrap; }
+.lesson-card { padding:22px; margin-bottom:15px; }
+.lesson-card h2 { font-size:20px; margin:0 0 13px; }
+.lesson-card h3 { font-size:15px; margin:20px 0 8px; }
+.lesson-card p,.lesson-card li { color:#56617a; line-height:1.75; font-size:14px; }
+.example { background:#f4f3ff; border-left:4px solid var(--primary); border-radius:8px; padding:15px; margin-top:12px; line-height:1.7; font-size:13px; }
+.tip { background:#fff8e9; border-left:4px solid var(--orange); padding:13px; border-radius:8px; font-size:13px; line-height:1.6; margin-top:12px; }
+.action { border:0; background:var(--primary); color:white; padding:11px 17px; border-radius:9px; font-weight:700; }
+.action:hover { filter:brightness(.94); }
+.secondary { border:1px solid var(--border); background:white; color:var(--text); padding:10px 15px; border-radius:9px; }
+.button-row { display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+.quiz-question { font-size:18px; font-weight:750; line-height:1.5; margin:15px 0; }
+.answer {
+  display:block; width:100%; text-align:left; border:1px solid var(--border);
+  border-radius:10px; background:white; padding:13px; margin:9px 0;
+}
+.answer:hover { border-color:var(--primary); background:#f8f7ff; }
+.answer.correct { border-color:var(--green); background:#eaf8f2; }
+.answer.wrong { border-color:var(--red); background:#fff0f1; }
+.feedback { padding:13px; border-radius:9px; margin-top:12px; font-size:13px; line-height:1.6; }
+.feedback.good { background:#eaf8f2; color:#08744e; }
+.feedback.bad { background:#fff0f1; color:#a52d3c; }
+.hidden { display:none!important; }
+.tip-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+.tip-card { padding:18px; }
+.tip-card h3 { margin:0 0 9px; font-size:15px; }
+.tip-card p,.tip-card li { font-size:13px; color:#65708a; line-height:1.65; }
+.reward-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.reward { background:white; border:1px solid var(--border); border-radius:14px; padding:17px; }
+.reward h3 { font-size:14px; margin:8px 0; }
+.reward p { font-size:12px; color:var(--muted); }
+.small { font-size:12px; color:var(--muted); }
+.empty { padding:30px; text-align:center; color:var(--muted); }
+.mobile-menu { display:none; }
+@media(max-width:900px) {
+ .sidebar { width:205px; }
+ .main { margin-left:205px; width:calc(100% - 205px); }
+ .stat-grid { grid-template-columns:repeat(2,1fr); }
+ .subject-grid { grid-template-columns:repeat(2,1fr); }
+}
+@media(max-width:650px) {
+ .sidebar { display:none; }
+ .main { margin:0; width:100%; padding:20px 15px; }
+ .topbar { align-items:flex-start; flex-direction:column; }
+ .top-actions { width:100%; }
+ .top-actions select { flex:1; }
+ .subject-grid,.topic-list,.tip-grid,.reward-grid { grid-template-columns:1fr; }
+ .stat-grid { grid-template-columns:repeat(2,1fr); }
+}
+
+/* AI tutor and generated quiz additions */
+.chat-shell{display:flex;flex-direction:column;min-height:480px;max-height:680px}
+.chat-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.chat-toolbar select{flex:1;min-width:150px}
+.chat-messages{flex:1;overflow:auto;background:#fafaff;border:1px solid var(--border);border-radius:13px;padding:16px;min-height:300px}
+.chat-message{max-width:85%;padding:12px 14px;border-radius:13px;margin:9px 0;white-space:pre-wrap;line-height:1.6;font-size:13px;overflow-wrap:anywhere}
+.chat-message.user{margin-left:auto;background:var(--primary);color:#fff;border-bottom-right-radius:4px}
+.chat-message.assistant{margin-right:auto;background:#fff;border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px}
+.chat-compose{display:flex;gap:10px;margin-top:13px}
+.chat-compose textarea{flex:1;resize:vertical;min-height:48px;max-height:130px;border:1px solid var(--border);border-radius:10px;padding:12px;font:inherit}
+.chat-status{font-size:12px;color:var(--muted);margin-top:9px;min-height:18px}
+.quiz-loading{padding:25px;text-align:center;color:var(--muted)}
+.quiz-controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.quiz-controls select{min-width:160px;flex:1}
+
+
+/* NOVALEARN STUDIO VISUAL SYSTEM */
+:root{--bg:#f6f7ff;--surface:#fff;--text:#171b36;--muted:#747b99;--primary:#6857ed;--light:#efedff;--border:#e9e9f4;--green:#159b70;--orange:#ed9841;--red:#e35b68;--shadow:0 14px 40px rgba(42,35,112,.07);--shadow-hover:0 22px 55px rgba(42,35,112,.13)}
+html{scroll-behavior:smooth}body{background:radial-gradient(ellipse at 88% 4%,rgba(190,183,255,.20),transparent 28%),radial-gradient(ellipse at 8% 48%,rgba(199,231,255,.17),transparent 30%),var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:-.01em}
+button,select,input,textarea{transition:border-color .2s,box-shadow .2s,transform .2s,background .2s}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(104,87,237,.2);outline-offset:2px}
+.sidebar{background:rgba(255,255,255,.88);backdrop-filter:blur(18px);border-right:1px solid rgba(225,225,241,.9);box-shadow:8px 0 35px rgba(39,35,99,.025)}.logo{font-size:26px;letter-spacing:-1.4px;display:flex;align-items:center;gap:9px}.logo:before{content:"✦";display:grid;place-items:center;width:34px;height:34px;border-radius:12px;color:white;font-size:18px;background:linear-gradient(135deg,#877aff,#5745dd);box-shadow:0 7px 18px #6b5bea55}.logo span{color:var(--primary)}
+.nav-label{font-size:9px;letter-spacing:1.8px;color:#9a9eb3}.nav-btn{border-radius:12px;padding:13px 14px;margin:3px 0;position:relative;transition:all .22s ease}.nav-btn:hover{transform:translateX(3px);background:#f7f6ff}.nav-btn.active{background:linear-gradient(100deg,#efedff,#f8f7ff);color:var(--primary);box-shadow:inset 3px 0 0 var(--primary)}.sidebar-bottom{background:linear-gradient(135deg,#f2efff,#f7f8ff);border:1px solid #e8e4ff;color:#73718f}
+.main{padding-top:32px}.topbar{margin-bottom:25px}.topbar h1{font-size:clamp(23px,2.2vw,30px);font-weight:800;letter-spacing:-1.1px}.topbar p{font-size:13px}.top-actions .search{border-radius:13px;background:rgba(255,255,255,.86)}select,.search{border-radius:12px;box-shadow:0 2px 8px rgba(35,35,90,.025)}
+.stat,.panel,.subject-card,.topic-card,.lesson-card,.tip-card,.reward{border:1px solid rgba(230,230,244,.95);border-radius:19px;box-shadow:0 5px 20px rgba(39,35,99,.025)}.stat{padding:21px;position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s}.stat:after{content:"";position:absolute;width:90px;height:90px;border-radius:50%;right:-32px;top:-38px;background:linear-gradient(135deg,#eeecff,#faf9ff);opacity:.9}.stat:hover{transform:translateY(-3px);box-shadow:var(--shadow)}.stat-label{font-size:10px;font-weight:800;letter-spacing:1.2px}.stat-value{font-size:30px;letter-spacing:-1px;position:relative;z-index:1}
+.section-head{margin-top:31px}.section-head h2{font-size:19px;letter-spacing:-.5px}.subject-grid{gap:17px}.subject-card{padding:21px;position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s,border-color .25s}.subject-card:after{content:"";position:absolute;width:110px;height:110px;border-radius:50%;right:-52px;top:-52px;background:linear-gradient(135deg,#f1efff,#f9f8ff);z-index:0}.subject-card>*{position:relative;z-index:1}.subject-card:hover{transform:translateY(-5px);border-color:#c8c1ff;box-shadow:var(--shadow-hover)}.subject-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:15px;background:linear-gradient(145deg,#f0eeff,#faf9ff);font-size:25px}.subject-card h3{font-size:16px;letter-spacing:-.3px}.progress-track{height:8px;background:#f0f0f8}.progress-fill{background:linear-gradient(90deg,#8274ff,#5b4ade);box-shadow:0 2px 8px #6a5bea44;transition:width .7s cubic-bezier(.2,.8,.2,1)}
+.panel,.lesson-card{padding:25px;box-shadow:var(--shadow)}.topic-list{gap:14px}.topic-card{padding:17px;border-radius:15px;transition:transform .2s,box-shadow .2s,border-color .2s}.topic-card:hover{transform:translateY(-2px);border-color:#c8c1ff;box-shadow:var(--shadow)}.topic-number{width:36px;height:36px;border-radius:12px}.lesson-card h2{font-size:25px;letter-spacing:-.7px}.lesson-card h3{font-size:15px;letter-spacing:-.2px}.lesson-card p,.lesson-card li{font-size:14px;line-height:1.8}.example{background:linear-gradient(120deg,#f2f0ff,#faf9ff);border-left-color:#7869f4;border-radius:12px;padding:17px}.tip{border-radius:12px}
+.action{background:linear-gradient(110deg,#7565f5,#5948dc);border-radius:11px;box-shadow:0 7px 17px rgba(99,81,225,.18);transition:transform .2s,box-shadow .2s,filter .2s}.action:hover{transform:translateY(-2px);box-shadow:0 11px 22px rgba(99,81,225,.25);filter:none}.action:active{transform:translateY(0) scale(.98)}.action:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}.secondary{border-radius:11px;background:#fff}.secondary:hover{border-color:#c7c0ff;background:#faf9ff}.answer{border-radius:12px;padding:15px;transition:all .2s}.answer:hover:not(:disabled){transform:translateX(3px);border-color:#bdb5ff}.answer.correct{border-color:#7bc9a8;background:#effaf5}.answer.wrong{border-color:#efa3ac;background:#fff3f4}.feedback{border-radius:12px;padding:15px}
+.page{display:none;opacity:0;transform:translateY(9px)}.page.active{display:block;animation:pageIn .36s cubic-bezier(.2,.75,.25,1) forwards}@keyframes pageIn{to{opacity:1;transform:translateY(0)}}.chat-shell{gap:4px}.chat-messages{background:linear-gradient(145deg,#f8f7ff,#fbfcff);border-radius:16px;padding:18px}.chat-message{font-size:14px;line-height:1.75;border-radius:16px;box-shadow:0 3px 12px rgba(40,35,100,.035);animation:messageIn .22s ease-out}@keyframes messageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}.chat-message.user{background:linear-gradient(120deg,#7565f5,#5848d8);border-bottom-right-radius:5px}.chat-message.assistant{border:1px solid #eceaf7;border-bottom-left-radius:5px}.chat-compose textarea{border-radius:13px;line-height:1.5}.quiz-loading{border:1px dashed #c8c1ff;background:linear-gradient(130deg,#faf9ff,#fff)}
+.welcome-hero{position:relative;isolation:isolate;overflow:hidden;display:grid;grid-template-columns:1.3fr .7fr;align-items:center;min-height:205px;padding:29px 34px;margin-bottom:23px;border-radius:24px;color:#fff;background:linear-gradient(112deg,#30266f 0%,#5948ca 53%,#8978ff 100%);box-shadow:0 18px 45px rgba(76,62,174,.2)}.welcome-hero:before{content:"";position:absolute;z-index:-1;width:390px;height:390px;border:1px solid #ffffff22;border-radius:50%;right:4%;top:-105px;box-shadow:0 0 0 34px #ffffff09,0 0 0 72px #ffffff07}.welcome-hero:after{content:"";position:absolute;z-index:-1;width:220px;height:220px;border-radius:50%;right:12%;top:-100px;background:#ffffff0b;filter:blur(2px)}.hero-copy{max-width:580px}.hero-eyebrow{font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:800;color:#d5d0ff;margin-bottom:12px}.hero-title{font-size:clamp(25px,3vw,36px);line-height:1.13;letter-spacing:-1.3px;font-weight:850;margin:0 0 11px}.hero-subtitle{font-size:13px;line-height:1.7;color:#e4e0ff;max-width:450px;margin:0}.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}.hero-button{border:0;border-radius:11px;padding:11px 16px;font-size:12px;font-weight:800;background:#fff;color:#5142c3}.hero-button.ghost{background:#ffffff17;color:#fff;border:1px solid #ffffff3c}.hero-art{width:100%;max-width:250px;justify-self:end;filter:drop-shadow(0 14px 25px #21185b44);animation:floatArt 6s ease-in-out infinite}@keyframes floatArt{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.quick-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 27px}.quick-card{display:flex;align-items:center;gap:12px;padding:15px 17px;border:1px solid var(--border);background:#fff;border-radius:15px;cursor:pointer;transition:all .22s}.quick-card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:#c8c1ff}.quick-icon{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;background:#f0eeff;font-size:18px}.quick-card b{display:block;font-size:12px}.quick-card span{display:block;color:var(--muted);font-size:10px;margin-top:3px}.api-pill{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid var(--border);border-radius:30px;font-size:11px;color:var(--muted);background:#fff}.api-dot{width:7px;height:7px;border-radius:50%;background:#d6a34d}.api-pill.ready .api-dot{background:#18a879;box-shadow:0 0 0 4px #18a87918}.api-pill.error .api-dot{background:#e35b68}.mobile-dock{display:none}
+@media(max-width:900px){.welcome-hero{grid-template-columns:1fr .5fr;padding:25px}.hero-art{max-width:190px}}
+@media(max-width:650px){.sidebar{display:none}.main{margin:0;width:100%;padding:20px 15px 95px}.topbar{padding-top:4px}.welcome-hero{grid-template-columns:1fr;min-height:0;padding:24px}.hero-art{position:absolute;right:-15px;bottom:-20px;width:130px;opacity:.28}.hero-copy{position:relative;z-index:1}.hero-subtitle{max-width:75%}.quick-strip{grid-template-columns:1fr;gap:9px}.quick-card{padding:12px}.mobile-dock{display:flex;position:fixed;z-index:20;bottom:10px;left:10px;right:10px;justify-content:space-around;gap:3px;padding:8px;background:rgba(255,255,255,.92);backdrop-filter:blur(18px);border:1px solid #e7e5f5;border-radius:18px;box-shadow:0 12px 35px #28205a20}.mobile-dock button{border:0;background:transparent;color:#7b7f98;font-size:10px;font-weight:700;padding:7px 8px;border-radius:10px;display:grid;gap:4px;justify-items:center}.mobile-dock button span:first-child{font-size:17px}.mobile-dock button.active{background:#f0eeff;color:var(--primary)}.chat-compose{align-items:stretch}.chat-compose .action{padding:10px 13px}.stat-grid{gap:10px}.stat{padding:15px}.stat-value{font-size:24px}.panel,.lesson-card{padding:18px}.topic-list,.subject-grid,.tip-grid,.reward-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="logo">Nova<span>Learn</span>.</div>
+  <div class="nav-label">LEARNING</div>
+  <button class="nav-btn active" data-page="dashboard">⌂ &nbsp; Dashboard</button>
+  <button class="nav-btn" data-page="learn">▤ &nbsp; Learn</button>
+  <button class="nav-btn" data-page="practice">✎ &nbsp; Practice Quiz</button>
+  <button class="nav-btn" data-page="tips">✦ &nbsp; Tips & Shortcuts</button>
+  <div class="nav-label">YOUR SPACE</div>
+  <button class="nav-btn" data-page="progress">▥ &nbsp; My Progress</button>
+  <button class="nav-btn" data-page="rewards">◇ &nbsp; Rewards Shop</button>
+  <button class="nav-btn" data-page="ai">◎ &nbsp; AI Tutor</button>
+  <div class="sidebar-bottom">
+    <b>Keep learning.</b><br>
+    Small steps every day lead to big improvements.
+  </div>
+</aside>
+
+<main class="main">
+<header class="topbar">
+  <div>
+    <h1 id="pageTitle">Welcome to NovaLearn!</h1>
+    <p id="pageSubtitle">Your learning space. Learn at your own pace.</p>
+  </div>
+  <div class="top-actions">
+    <input class="search" id="globalSearch" placeholder="⌕ Search subjects or topics..." />
+    <select id="gradeSelect">
+      <option value="6">Grade 6</option>
+      <option value="7">Grade 7</option>
+      <option value="8" selected>Grade 8</option>
+      <option value="9">Grade 9</option>
+    </select>
+  </div>
+</header>
+
+<section class="page active" id="dashboard">
+
+  <div class="welcome-hero"><div class="hero-copy"><div class="hero-eyebrow">YOUR PERSONAL LEARNING SPACE</div><h2 class="hero-title">Make every study session<br>count.</h2><p class="hero-subtitle">Learn a concept, practise it with fresh questions, and build confidence one topic at a time.</p><div class="hero-actions"><button class="hero-button" onclick="showPage('learn')">Explore subjects&nbsp; →</button><button class="hero-button ghost" onclick="showPage('ai')">Ask Nova AI&nbsp; ✦</button></div></div>
+  <svg class="hero-art" viewBox="0 0 260 220" role="img" aria-label="Illustration of books and a glowing learning orb"><defs><linearGradient id="bookA" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#c9c3ff"/></linearGradient><linearGradient id="bookB" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#b9f1e4"/><stop offset="1" stop-color="#55c7b3"/></linearGradient><linearGradient id="orb" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#a99dff"/></linearGradient></defs><circle cx="166" cy="76" r="54" fill="#fff" opacity=".10"/><circle cx="166" cy="76" r="37" fill="url(#orb)"/><path d="M166 48l7 19 19 7-19 7-7 19-7-19-19-7 19-7z" fill="#6656df"/><path d="M42 151q42-18 84 0v35q-42-18-84 0z" fill="url(#bookA)"/><path d="M126 151q42-18 84 0v35q-42-18-84 0z" fill="#e9e6ff"/><path d="M42 151q42-18 84 0v35q-42-18-84 0zM126 151q42-18 84 0v35q-42-18-84 0z" fill="none" stroke="#a39aff" stroke-width="2"/><path d="M55 160q31-9 60 2M55 169q31-9 60 2M139 162q30-9 58 0M139 171q30-9 58 0" stroke="#aaa2f2" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M32 189h174l-13 14H45z" fill="url(#bookB)"/><path d="M32 189h174" stroke="#d3fff4" stroke-width="2"/><circle cx="218" cy="40" r="4" fill="#fff"/><circle cx="28" cy="89" r="3" fill="#d8d1ff"/><path d="M218 91l4 10 10 4-10 4-4 10-4-10-10-4 10-4z" fill="#fff" opacity=".8"/></svg></div>
+  <div class="quick-strip"><div class="quick-card" onclick="showPage('practice')"><div class="quick-icon">✎</div><div><b>Practice by topic</b><span>Fresh AI-generated questions</span></div></div><div class="quick-card" onclick="showPage('ai')"><div class="quick-icon">✦</div><div><b>Ask Nova AI</b><span>Get a step-by-step explanation</span></div></div><div class="quick-card" onclick="showPage('progress')"><div class="quick-icon">↗</div><div><b>Track your progress</b><span>See what you have completed</span></div></div></div>
+
+  <div class="stat-grid">
+    <div class="stat"><div class="stat-label">TOTAL XP</div><div class="stat-value" id="xpStat">0</div><div class="stat-note">Keep earning points</div></div>
+    <div class="stat"><div class="stat-label">COINS</div><div class="stat-value" id="coinStat">0</div><div class="stat-note">Spend them in the shop</div></div>
+    <div class="stat"><div class="stat-label">TOPICS COMPLETED</div><div class="stat-value" id="topicStat">0</div><div class="stat-note">Keep making progress</div></div>
+    <div class="stat"><div class="stat-label">DAY STREAK</div><div class="stat-value" id="streakStat">0 🔥</div><div class="stat-note">Learning consistently</div></div>
+  </div>
+  <div class="section-head"><div><h2>Your subjects</h2><p>Choose a subject to explore its topics.</p></div></div>
+  <div class="subject-grid" id="dashboardSubjects"></div>
+  <div class="section-head"><div><h2>Continue learning</h2><p>Pick up where you left off.</p></div></div>
+  <div class="panel" id="continuePanel"><p class="small">Choose a subject and start your first lesson.</p></div>
+</section>
+
+<section class="page" id="learn">
+  <div id="learnContent"></div>
+</section>
+
+<section class="page" id="lesson">
+  <div id="lessonContent"></div>
+</section>
+
+<section class="page" id="practice">
+  <div id="practiceContent">
+    <div class="panel">
+      <h2>Practice Quiz</h2>
+      <p class="small">Choose a subject and topic to test your understanding.</p>
+      <div class="button-row">
+        <select id="quizSubject"></select>
+        <select id="quizTopic"></select>
+        <button class="action" id="startQuiz">Start quiz</button>
+      </div>
+    </div>
+    <div id="quizArea"></div>
+  </div>
+</section>
+
+<section class="page" id="tips">
+  <div class="section-head"><div><h2>Tips & Shortcuts</h2><p>Useful methods, formulas and common mistakes.</p></div></div>
+  <div class="panel">
+    <select id="tipsSubject"></select>
+    <div class="tip-grid" id="tipsContent" style="margin-top:17px"></div>
+  </div>
+</section>
+
+<section class="page" id="progress">
+  <div class="section-head"><div><h2>Your progress</h2><p>Track your learning across all subjects.</p></div></div>
+  <div class="stat-grid">
+    <div class="stat"><div class="stat-label">XP EARNED</div><div class="stat-value" id="progressXP">0</div></div>
+    <div class="stat"><div class="stat-label">COINS EARNED</div><div class="stat-value" id="progressCoins">0</div></div>
+    <div class="stat"><div class="stat-label">COMPLETED TOPICS</div><div class="stat-value" id="progressTopics">0</div></div>
+    <div class="stat"><div class="stat-label">QUIZZES COMPLETED</div><div class="stat-value" id="progressQuizzes">0</div></div>
+  </div>
+  <div class="panel"><h2>Subject progress</h2><div id="progressSubjects"></div></div>
+</section>
+
+<section class="page" id="rewards">
+  <div class="section-head"><div><h2>Rewards shop</h2><p>Use your coins to unlock rewards.</p></div><b id="shopCoins">0 coins</b></div>
+  <div class="reward-grid" id="rewardGrid"></div>
+</section>
+
+<section class="page" id="ai">
+ <div class="panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><h2 style="margin:0">Nova AI Tutor</h2><span class="api-pill" id="apiStatusPill"><i class="api-dot"></i><span id="apiStatusText">Checking connection…</span></span></div>
+  <p class="small">Ask questions, request worked examples, or get help understanding a topic.</p>
+  <div class="chat-shell">
+   <div class="chat-toolbar">
+    <select id="tutorSubject" aria-label="Tutor subject"></select>
+    <select id="tutorTopic" aria-label="Tutor topic"></select>
+   </div>
+   <div class="chat-messages" id="chatMessages" aria-live="polite">
+    <div class="chat-message assistant">Hi! Choose a subject and topic above, then ask me anything about it. I can explain concepts step by step and work through examples with you.</div>
+   </div>
+   <div class="chat-compose">
+    <textarea id="chatInput" placeholder="Ask your question about this topic..." aria-label="Your question"></textarea>
+    <button class="action" id="sendChat">Send</button>
+   </div>
+   <div class="chat-status" id="chatStatus">Choose a topic and ask a question. Your messages are sent securely through the NovaLearn backend.</div>
+  </div>
+ </div>
+</section>
+</main>
+</div>
+
+<nav class="mobile-dock" aria-label="Quick navigation"><button data-mobile-page="dashboard" class="active"><span>⌂</span>Home</button><button data-mobile-page="learn"><span>▤</span>Learn</button><button data-mobile-page="practice"><span>✎</span>Quiz</button><button data-mobile-page="ai"><span>✦</span>AI Tutor</button><button data-mobile-page="progress"><span>↗</span>Progress</button></nav>
+
+<script>
+// -------------------- TOPIC DATABASE --------------------
+const subjects = {
+ Mathematics:{icon:"📐",topics:[
+  ["Number systems","Integers, fractions, decimals and rational numbers."],
+  ["Factors and multiples","Prime numbers, HCF and LCM."],
+  ["Fractions and percentages","Equivalent fractions, percentages and conversions."],
+  ["Ratio and proportion","Comparing quantities and solving proportions."],
+  ["Algebraic expressions","Variables, coefficients and simplifying expressions."],
+  ["Linear equations","Solving equations with one unknown."],
+  ["Geometry","Angles, triangles, polygons and their properties."],
+  ["Mensuration","Perimeter, area and volume."],
+  ["Data handling","Mean, median, mode and interpreting graphs."],
+  ["Probability","Finding the likelihood of an event."]
+ ]},
+ Biology:{icon:"🧬",topics:[
+  ["Cells and cell structure","Organelles and their functions."],
+  ["Plant and animal tissues","How cells form specialised tissues."],
+  ["Nutrition","Nutrients, balanced diets and digestion."],
+  ["Respiration","How cells release energy."],
+  ["Transportation","Transport systems in plants and animals."],
+  ["Reproduction","Basic processes of reproduction in living organisms."],
+  ["Ecology","Ecosystems, food chains and food webs."],
+  ["Adaptation","How organisms survive in their environments."],
+  ["Human body systems","How major body systems work together."],
+  ["Genetics and inheritance","Traits, genes and inherited characteristics."]
+ ]},
+ Chemistry:{icon:"⚗️",topics:[
+  ["States of matter","Solids, liquids, gases and particle theory."],
+  ["Elements and compounds","Atoms, elements, molecules and compounds."],
+  ["Atomic structure","Protons, neutrons, electrons and atomic number."],
+  ["Periodic table","Groups, periods and patterns in elements."],
+  ["Chemical formulae","Writing and interpreting chemical formulae."],
+  ["Chemical bonding","Ionic, covalent and metallic bonding."],
+  ["Chemical reactions","Reactants, products and evidence of reactions."],
+  ["Acids and bases","The pH scale, indicators and neutralisation."],
+  ["Metals and non-metals","Properties and reactions of different elements."],
+  ["Separation techniques","Filtration, evaporation, distillation and chromatography."]
+ ]},
+ Physics:{icon:"⚡",topics:[
+  ["Measurement and units","Physical quantities, SI units and measuring instruments."],
+  ["Motion","Distance, displacement, speed and velocity."],
+  ["Forces","Types of forces and their effects."],
+  ["Newton's laws","The relationship between force and motion."],
+  ["Work, energy and power","Energy transfers and calculations."],
+  ["Heat and temperature","Thermal energy and heat transfer."],
+  ["Light","Reflection, refraction and lenses."],
+  ["Sound","Vibrations, frequency and sound waves."],
+  ["Electricity","Current, voltage, resistance and circuits."],
+  ["Magnetism","Magnetic fields, poles and electromagnets."]
+ ]},
+ English:{icon:"📖",topics:[
+  ["Parts of speech","Nouns, verbs, adjectives, adverbs and more."],
+  ["Sentence structure","Clauses, phrases and sentence types."],
+  ["Punctuation","Using commas, apostrophes and other punctuation."],
+  ["Tenses","Past, present and future forms."],
+  ["Active and passive voice","Changing the focus of a sentence."],
+  ["Figurative language","Similes, metaphors, personification and imagery."],
+  ["Reading comprehension","Finding meaning, evidence and inference."],
+  ["Poetry analysis","Exploring structure, language and themes."],
+  ["Creative writing","Building characters, settings and plots."],
+  ["Argumentative writing","Creating clear arguments supported by evidence."]
+ ]},
+ Geography:{icon:"🌍",topics:[
+  ["Maps and map skills","Scale, direction, symbols and grid references."],
+  ["Latitude and longitude","Locating places using coordinates."],
+  ["Weather and climate","Elements of weather and climate patterns."],
+  ["Rocks and the rock cycle","Igneous, sedimentary and metamorphic rocks."],
+  ["Plate tectonics","Earth's plates, earthquakes and volcanoes."],
+  ["Rivers and landforms","River processes and landform formation."],
+  ["Population","Population distribution, density and change."],
+  ["Urbanisation","Cities, migration and urban challenges."],
+  ["Natural resources","Resource use, conservation and sustainability."],
+  ["Climate change","Causes, impacts and possible responses."]
+ ]},
+ Python:{icon:"🐍",topics:[
+  ["Introduction to Python","Programs, syntax, comments and output."],
+  ["Variables and data types","Storing values using different data types."],
+  ["Input and output","Using input() and print()."],
+  ["Operators","Arithmetic, comparison and logical operators."],
+  ["Conditional statements","Using if, elif and else."],
+  ["Loops","Repeating instructions with for and while."],
+  ["Strings","Indexing, slicing and string methods."],
+  ["Lists and tuples","Storing and accessing collections of data."],
+  ["Functions","Creating reusable blocks of code."],
+  ["Error handling","Understanding and handling common errors."]
+ ]}
+};
+
+const gradeTopics = {
+  6:{
+    Mathematics:["Whole numbers","Factors and multiples","Fractions and decimals","Ratio basics","Introduction to algebra","Simple equations","Basic geometry","Perimeter and area","Reading data","Basic probability"],
+    Biology:["Living and non-living things","Plant and animal cells","Plant parts","Nutrition","Human digestion","Respiration basics","Habitats","Food chains","Adaptations","Health and hygiene"],
+    Chemistry:["Solids, liquids and gases","Changes of state","Materials and their properties","Elements and compounds","Introduction to atoms","Mixtures","Separating mixtures","Reversible changes","Irreversible changes","Acids and indicators"],
+    Physics:["Measurements","Distance and time","Speed basics","Types of forces","Gravity and friction","Simple machines","Light and shadows","Sound and vibrations","Magnets","Simple circuits"],
+    English:["Nouns and pronouns","Verbs and adjectives","Sentence types","Basic punctuation","Simple and continuous tenses","Paragraph writing","Similes and metaphors","Reading comprehension","Character description","Writing a story"],
+    Geography:["Continents and oceans","Map symbols and scale","Latitude and longitude","Weather elements","Climate zones","Mountains and plains","Rivers","Natural resources","Settlements","Environmental protection"],
+    Python:["What is Python?","Variables","Data types","Print and input","Arithmetic operators","If statements","For loops","While loops","Strings","Simple lists"]
+  },
+  7:{
+    Mathematics:["Integers","Prime factors, HCF and LCM","Fractions and percentages","Ratio and proportion","Algebraic expressions","Linear equations","Angles and triangles","Area and volume","Averages and graphs","Probability"],
+    Biology:["Cell structure","Specialised cells","Plant tissues","Nutrition and digestion","Respiration","Transport in plants","Reproduction in plants","Ecosystems","Food webs","Adaptations"],
+    Chemistry:["Particle model","Elements and compounds","Atomic structure","Periodic table basics","Chemical symbols","Mixtures and solutions","Physical and chemical changes","Acids and alkalis","Metals and non-metals","Separation methods"],
+    Physics:["Physical quantities","Speed and distance","Balanced and unbalanced forces","Friction and gravity","Pressure","Energy forms","Heat transfer","Reflection of light","Sound waves","Series circuits"],
+    English:["Parts of speech","Clauses and phrases","Punctuation rules","Past and present tenses","Active and passive voice","Figurative language","Inference","Poetry techniques","Descriptive writing","Persuasive writing"],
+    Geography:["Map scales and coordinates","Latitude and longitude","Weather and climate","Rock types","Weathering and erosion","River features","Population distribution","Settlement patterns","Natural resources","Sustainable development"],
+    Python:["Variables and types","Input and output","Type conversion","Arithmetic operators","Comparison operators","If and elif","For loops","While loops","String methods","List methods"]
+  },
+  8:{
+    Mathematics:["Rational numbers","Powers and roots","Percentages and compound change","Direct and inverse proportion","Algebraic expressions","Linear equations","Geometry and angle properties","Mensuration","Statistics","Probability"],
+    Biology:["Cell organelles","Plant and animal tissues","Photosynthesis","Human digestion","Aerobic and anaerobic respiration","Transport systems","Human reproduction","Ecosystems and energy flow","Natural selection and adaptation","Human body systems"],
+    Chemistry:["States of matter","Elements and compounds","Atomic structure","Periodic table","Chemical formulae","Ionic and covalent bonding","Chemical reactions","Acids, bases and salts","Reactivity of metals","Separation techniques"],
+    Physics:["Measurement and units","Speed and velocity","Force and acceleration","Newton's laws","Work and energy","Heat transfer","Reflection and refraction","Wave properties","Electric current and voltage","Resistance and circuits"],
+    English:["Parts of speech","Sentence structure","Advanced punctuation","Verb tenses","Active and passive voice","Figurative language","Comprehension and inference","Poetry analysis","Narrative writing","Argumentative writing"],
+    Geography:["Map skills and scale","Latitude and longitude","Weather and climate","Rock cycle","Plate tectonics","River processes","Population change","Urbanisation","Resource management","Climate change"],
+    Python:["Variables and data types","Input and output","Type conversion","Operators","Conditional statements","For and while loops","String slicing and methods","Lists and tuples","Functions","Exception handling"]
+  },
+  9:{
+    Mathematics:["Real number system","Indices and surds","Percentage change and interest","Ratio and variation","Factorisation and identities","Linear equations and inequalities","Coordinate geometry","Surface area and volume","Statistics and cumulative frequency","Probability"],
+    Biology:["Cell structure and microscopy","Cell division","Biological molecules","Enzymes and digestion","Photosynthesis","Respiration","Transport in organisms","Inheritance and genetics","Ecology and populations","Human coordination systems"],
+    Chemistry:["Atomic structure and isotopes","Electronic configuration","Periodic trends","Ionic bonding","Covalent bonding","Metallic bonding","Balancing equations","Acids and salts","Reactivity series","Electrolysis and separation"],
+    Physics:["Scalars and vectors","Motion graphs","Acceleration","Newton's laws","Momentum and energy","Specific heat capacity","Wave behaviour","Refraction and lenses","Electrical circuits","Electromagnetism"],
+    English:["Advanced grammar","Complex sentences","Punctuation and style","Tense consistency","Voice and tone","Language analysis","Inference and evaluation","Poetry comparison","Discursive writing","Speech and article writing"],
+    Geography:["Topographic maps","Geographical coordinates","Atmospheric circulation","Climate systems","Plate boundaries","River and coastal processes","Demographic transition","Urban growth","Global resource distribution","Climate change responses"],
+    Python:["Variables and data structures","Input validation","Operators and expressions","Nested conditionals","Nested loops","List comprehensions","Functions and parameters","Tuples and dictionaries","Modules and libraries","Exception handling"]
+  }
+};
+
+// -------------------- LESSON CONTENT --------------------
+const explanations = {
+ Mathematics:{
+  "Fractions and decimals":["A fraction represents part of a whole. Its numerator tells us how many parts we have, while its denominator tells us the total equal parts.","To add fractions, first find a common denominator. To multiply fractions, multiply the numerators and denominators."],
+  "Linear equations":["An equation states that two expressions are equal. A variable represents an unknown value.","To solve an equation, use inverse operations to isolate the variable. Whatever operation you perform on one side must also be performed on the other."],
+  "Ratio and proportion":["A ratio compares two or more quantities. Ratios can be simplified by dividing every part by the same common factor.","A proportion states that two ratios are equal. Cross multiplication can help solve missing values."],
+  "Algebraic expressions":["An algebraic expression contains numbers, variables and operations. A coefficient is the number multiplying a variable.","Like terms have the same variable raised to the same power. Only like terms can be combined."],
+  "Probability":["Probability measures how likely an event is. It ranges from 0 (impossible) to 1 (certain).","For equally likely outcomes, probability equals favourable outcomes divided by total possible outcomes."]
+ },
+ Biology:{
+  "Cell structure":["Cells are the basic structural and functional units of living organisms. Different cells have different structures for their functions.","The nucleus contains genetic material. The cell membrane controls what enters and leaves the cell. Cytoplasm is where many chemical reactions occur."],
+  "Cell organelles":["Organelles are specialised structures inside cells. Each has a particular role that helps the cell function.","Mitochondria release energy through aerobic respiration. Ribosomes are responsible for protein synthesis."],
+  "Photosynthesis":["Photosynthesis is the process by which green plants use light energy to make glucose from carbon dioxide and water.","The process takes place mainly in chloroplasts, which contain chlorophyll to absorb light energy."],
+  "Respiration":["Cellular respiration releases energy from glucose so that cells can carry out their activities.","Aerobic respiration uses oxygen and releases more energy than anaerobic respiration."]
+ },
+ Chemistry:{
+  "Atomic structure":["An atom contains a central nucleus surrounded by electrons. The nucleus contains positively charged protons and neutral neutrons.","The atomic number equals the number of protons. In a neutral atom, the number of electrons equals the number of protons."],
+  "Chemical bonding":["Atoms form bonds to achieve more stable electron arrangements. Ionic bonding involves electron transfer; covalent bonding involves sharing electrons.","Ionic compounds usually form giant lattices. Simple covalent molecules generally have lower melting and boiling points."]
+ },
+ Physics:{
+  "Motion":["Motion describes a change in an object's position over time. Speed tells us how much distance is travelled per unit of time.","Average speed = total distance ÷ total time. Always use consistent units when calculating."],
+  "Forces":["A force is a push or pull that can change an object's motion or shape. Forces are measured in newtons (N).","The resultant force is the overall force after combining all forces, taking direction into account."],
+  "Electricity":["Electric current is the rate of flow of electric charge. It is measured in amperes (A).","Voltage is the energy transferred per unit charge. Resistance measures how much a component opposes current."]
+ },
+ English:{
+  "Figurative language":["Figurative language uses words in a non-literal way to create meaning or effect.","A simile compares using 'like' or 'as'. A metaphor describes one thing as another. Personification gives human qualities to non-human things."],
+  "Active and passive voice":["In active voice, the subject performs the action. In passive voice, the subject receives the action.","Active: The student solved the problem. Passive: The problem was solved by the student."],
+  "Argumentative writing":["Argumentative writing presents a clear position supported by logical reasons and evidence.","A strong paragraph makes a point, supports it with evidence and explains how that evidence supports the argument."]
+ },
+ Geography:{
+  "Latitude and longitude":["Latitude measures distance north or south of the Equator. Longitude measures distance east or west of the Prime Meridian.","Latitude lines run east-west. Longitude lines run from pole to pole."],
+  "Plate tectonics":["Earth's outer shell is divided into large plates that move slowly over the mantle.","At convergent boundaries plates move towards each other; at divergent boundaries they move apart; at transform boundaries they slide past each other."],
+  "Climate change":["Climate change refers to long-term changes in average temperatures and weather patterns.","Human activities such as burning fossil fuels increase greenhouse gas concentrations, strengthening the greenhouse effect."]
+ },
+ Python:{
+  "Variables and data types":["A variable is a named reference used to store a value. Python creates a variable when you assign a value to it.","Common data types include int for whole numbers, float for decimal numbers, str for text and bool for True or False."],
+  "Conditional statements":["Conditional statements allow a program to make decisions based on whether a condition is True or False.","Use if for the first condition, elif for additional conditions and else for the remaining case."],
+  "Loops":["Loops repeat a block of code. A for loop is often used when iterating over a sequence or a known range.","A while loop repeats as long as its condition remains True. Make sure the condition can eventually become False."],
+  "Lists and tuples":["A list stores multiple items in an ordered, changeable collection. A tuple is ordered but cannot be changed after creation.","List indexing begins at zero. Use append() to add an item to the end of a list."]
+ }
+};
+
+const examples = {
+ Mathematics:"Example: Solve 3x + 5 = 20. Subtract 5 from both sides: 3x = 15. Divide by 3: x = 5. Check: 3(5) + 5 = 20.",
+ Biology:"Example: A plant kept in darkness for a long time cannot photosynthesise effectively because there is no light energy. This reduces glucose production.",
+ Chemistry:"Example: Sodium has electron arrangement 2,8,1. It can lose one outer electron to form Na⁺, achieving a more stable arrangement.",
+ Physics:"Example: A cyclist travels 120 metres in 20 seconds. Speed = distance ÷ time = 120 ÷ 20 = 6 m/s.",
+ English:"Example: 'The classroom was a zoo' is a metaphor. It compares the classroom to a zoo to suggest that it was noisy and chaotic.",
+ Geography:"Example: A location at 20°N, 75°E is 20 degrees north of the Equator and 75 degrees east of the Prime Meridian.",
+ Python:"Example: score = 85. The variable score stores the integer 85. You can display it using print(score)."
+};
+
+const tips = {
+ Mathematics:[
+  ["Calculation strategy","Write down the formula first, substitute values carefully, then calculate. Keep units in your final answer."],
+  ["Common mistake","Do not add denominators when adding fractions. Find a common denominator first."],
+  ["Revision shortcut","Practise one example of each question type, then attempt a mixed set without looking at the solutions."]
+ ],
+ Biology:[
+  ["Remember processes","Learn biological processes as a sequence of steps. Explain what happens and why it happens."],
+  ["Common mistake","Do not confuse an organ, a tissue and a cell. They are different levels of organisation."],
+  ["Exam technique","Use precise scientific vocabulary and connect each structure to its function."]
+ ],
+ Chemistry:[
+  ["Remembering the periodic table","Learn how groups and periods relate to electron arrangements."],
+  ["Common mistake","A compound is chemically bonded; a mixture is not chemically bonded."],
+  ["Exam technique","Balance chemical equations by changing coefficients, not the chemical formulae."]
+ ],
+ Physics:[
+  ["Formula strategy","Write the formula, rearrange it if needed, substitute values and include the correct unit."],
+  ["Common mistake","Distance and displacement are not the same. Speed and velocity are not the same either."],
+  ["Revision shortcut","Practise identifying which formula matches the information given in a question."]
+ ],
+ English:[
+  ["Improve analysis","Do not just identify a technique. Explain its effect and what it suggests to the reader."],
+  ["Common mistake","A quotation alone does not explain an idea. Always analyse the evidence."],
+  ["Writing strategy","Plan your introduction, main points and conclusion before writing a longer response."]
+ ],
+ Geography:[
+  ["Case study strategy","Remember the location, causes, impacts and responses for each case study."],
+  ["Common mistake","Weather describes short-term conditions; climate describes long-term patterns."],
+  ["Exam technique","Support geographical explanations with specific places, examples and data when available."]
+ ],
+ Python:[
+  ["Debugging","Read the error message carefully. Check spelling, brackets, indentation and variable names."],
+  ["Common mistake","Python is case-sensitive. 'Score' and 'score' are different variable names."],
+  ["Practice strategy","Predict the output of a program before running it. This improves your understanding of code."]
+ ]
+};
+
+// Quiz questions are generated by the server for the selected topic.
+
+const state = {
+ xp:0, coins:0, completed:[], quizzes:0, streak:0,
+ lastDay:"", rewards:[], lastTopic:null
+};
+const STORAGE="novalearn_v1";
+function loadState() {
+ try {
+  const saved=JSON.parse(localStorage.getItem(STORAGE)||"{}");
+  Object.assign(state,saved);
+ } catch(e) { console.warn("Saved progress could not be loaded."); }
+ if(!Array.isArray(state.completed)) state.completed=[];
+ if(!Array.isArray(state.rewards)) state.rewards=[];
+ const today=new Date().toDateString();
+ if(state.lastDay!==today) {
+  const yesterday=new Date(Date.now()-86400000).toDateString();
+  state.streak=state.lastDay===yesterday ? (state.streak||0) : 0;
+ }
+}
+function saveState(){localStorage.setItem(STORAGE,JSON.stringify(state));}
+loadState();
+
+let currentSubject="Mathematics",currentTopic="",currentPage="dashboard";
+let quizQuestions=[],quizIndex=0,quizScore=0,answered=false;
+let tutorHistory=[];
+let quizRequestBusy=false;
+const $=id=>document.getElementById(id);
+const key=(s,t)=>`${$("gradeSelect").value}|${s}|${t}`;
+function isDone(s,t){return state.completed.includes(key(s,t));}
+function shuffle(arr){return [...arr].sort(()=>Math.random()-.5);}
+
+function updateStats(){
+ $("xpStat").textContent=state.xp;
+ $("coinStat").textContent=state.coins;
+ $("topicStat").textContent=state.completed.length;
+ $("streakStat").textContent=state.streak+" 🔥";
+ $("progressXP").textContent=state.xp;
+ $("progressCoins").textContent=state.coins;
+ $("progressTopics").textContent=state.completed.length;
+ $("progressQuizzes").textContent=state.quizzes;
+ $("shopCoins").textContent=state.coins+" coins";
+}
+function subjectProgress(s){
+ const topics=gradeTopics[$("gradeSelect").value][s];
+ const count=topics.filter(t=>isDone(s,t)).length;
+ return {count,total:topics.length,percent:Math.round(count/topics.length*100)};
+}
+function renderDashboard(){
+ updateStats();
+ $("dashboardSubjects").innerHTML=Object.keys(subjects).map(s=>{
+  const p=subjectProgress(s);
+  return `<div class="subject-card" onclick="openSubject('${s}')">
+   <div class="subject-icon">${subjects[s].icon}</div>
+   <h3>${s}</h3><p>${gradeTopics[$("gradeSelect").value][s].length} topics available</p>
+   <div class="progress-track"><div class="progress-fill" style="width:${p.percent}%"></div></div>
+   <div class="progress-caption"><span>${p.count} completed</span><span>${p.percent}%</span></div>
+  </div>`;
+ }).join("");
+ if(state.lastTopic){
+  $("continuePanel").innerHTML=`<b>${state.lastTopic.subject}: ${state.lastTopic.topic}</b><p class="small">Continue your last lesson.</p><button class="action" onclick="openLesson('${state.lastTopic.subject}','${state.lastTopic.topic}')">Continue learning</button>`;
+ }
+}
+
+function showPage(page){
+ currentPage=page;
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ $(page).classList.add("active");
+ document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+ const names={dashboard:["Welcome to NovaLearn!","Your learning space. Learn at your own pace."],learn:["Explore subjects","Choose a subject and discover its topics."],lesson:["Your lesson","Understand the concept, then try a practice quiz."],practice:["Practice Quiz","Test what you know."],tips:["Tips & Shortcuts","Study smarter with useful learning strategies."],progress:["My Progress","See how far you have come."],rewards:["Rewards Shop","Use your coins to unlock rewards."],ai:["AI Tutor","Your AI learning assistant."]};
+ $("pageTitle").textContent=names[page][0];
+ $("pageSubtitle").textContent=names[page][1];
+ if(page==="dashboard")renderDashboard();
+ if(page==="progress")renderProgress();
+ if(page==="tips")renderTips();
+ if(page==="rewards")renderRewards();
+ if(page==="ai")syncTutorSelectors();
+}
+document.querySelectorAll(".nav-btn").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
+
+function openSubject(s){
+ currentSubject=s;
+ showPage("learn");
+ renderLearn();
+}
+function renderLearn(){
+ const topics=gradeTopics[$("gradeSelect").value][currentSubject];
+ $("learnContent").innerHTML=`
+  <button class="back" onclick="showPage('dashboard')">← Back to dashboard</button>
+  <div class="panel"><div style="font-size:35px">${subjects[currentSubject].icon}</div>
+  <h2>${currentSubject}</h2><p class="small">Grade ${$("gradeSelect").value} · ${topics.length} topics</p>
+  <div class="progress-track"><div class="progress-fill" style="width:${subjectProgress(currentSubject).percent}%"></div></div>
+  <p class="small">${subjectProgress(currentSubject).count} of ${topics.length} topics completed</p></div>
+  <div class="topic-list">${topics.map((t,i)=>`
+   <div class="topic-card" onclick="openLesson('${currentSubject}','${t.replace(/'/g,"\\'")}')">
+    <div class="topic-number">${i+1}</div>
+    <div style="flex:1"><h3>${t}</h3><p>${subjects[currentSubject].topics[i][1]}</p></div>
+    ${isDone(currentSubject,t)?'<span class="tag">Completed</span>':'<span class="small">Study →</span>'}
+   </div>`).join("")}</div>`;
+}
+
+function getExplanation(subject,topic){
+ const found=explanations[subject]?.[topic];
+ if(found) return found;
+ const desc=subjects[subject].topics[gradeTopics[$("gradeSelect").value][subject].indexOf(topic)]?.[1]||topic;
+ return [
+  `${topic} is an important part of ${subject}. ${desc} Understanding the key ideas helps you apply the topic to questions and real-world examples.`,
+  `Start by identifying the main terms and ideas in ${topic}. Then connect each idea to an example. Practise explaining the concept in your own words rather than only memorising a definition.`
+ ];
+}
+function openLesson(s,t){
+ currentSubject=s;currentTopic=t;
+ state.lastTopic={subject:s,topic:t};saveState();
+ showPage("lesson");
+ const explanation=getExplanation(s,t);
+ const example=examples[s];
+ $("lessonContent").innerHTML=`
+  <button class="back" onclick="openSubject('${s}')">← Back to ${s}</button>
+  <div class="lesson-card">
+   <p class="small">${s.toUpperCase()} · GRADE ${$("gradeSelect").value}</p>
+   <h2>${t}</h2>
+   <h3>1. Understanding the concept</h3>
+   <p>${explanation[0]}</p>
+   <p>${explanation[1]}</p>
+   <h3>2. Worked example</h3>
+   <div class="example">${example}</div>
+   <h3>3. Remember this</h3>
+   <div class="tip">${tips[s][0][1]}</div>
+   <div class="button-row">
+    <button class="action" onclick="completeTopic('${s}','${t.replace(/'/g,"\\'")}')">${isDone(s,t)?"Completed ✓":"Mark as completed +20 XP"}</button>
+    <button class="secondary" onclick="startTopicQuiz('${s}','${t.replace(/'/g,"\\'")}')">Practise this topic →</button>
+   </div>
+  </div>
+  <div class="lesson-card"><h3>Check your understanding</h3>
+   <p>Before moving on, try explaining this topic without looking at your notes. Can you give an example of your own?</p>
+  </div>`;
+}
+function completeTopic(s,t){
+ if(isDone(s,t))return;
+ state.completed.push(key(s,t));
+ state.xp+=20;state.coins+=10;
+ const today=new Date().toDateString();
+ if(state.lastDay!==today){state.streak=state.lastDay===new Date(Date.now()-86400000).toDateString()?state.streak+1:1;state.lastDay=today;}
+ saveState();updateStats();renderLearn();
+ openLesson(s,t);
+}
+function startTopicQuiz(s,t){
+ currentSubject=s;currentTopic=t;
+ showPage("practice");
+ $("quizSubject").value=s;updateQuizTopics();
+ $("quizTopic").value=t;
+ beginQuiz(s,t);
+}
+
+// -------------------- QUIZZES --------------------
+function fillQuizSelectors(){
+ $("quizSubject").innerHTML=Object.keys(subjects).map(s=>`<option>${s}</option>`).join("");
+ $("tipsSubject").innerHTML=Object.keys(subjects).map(s=>`<option>${s}</option>`).join("");
+ $("tutorSubject").innerHTML=Object.keys(subjects).map(s=>`<option>${s}</option>`).join("");
+ updateQuizTopics();
+ updateTutorTopics();
+}
+function updateQuizTopics(){
+ const s=$("quizSubject").value;
+ const topics=gradeTopics[$("gradeSelect").value][s]||[];
+ $("quizTopic").innerHTML=topics.map(t=>`<option>${escapeHTML(t)}</option>`).join("");
+}
+function updateTutorTopics(){
+ const s=$("tutorSubject").value;
+ const topics=gradeTopics[$("gradeSelect").value][s]||[];
+ $("tutorTopic").innerHTML=topics.map(t=>`<option>${escapeHTML(t)}</option>`).join("");
+}
+function syncTutorSelectors(){
+ if(currentSubject && subjects[currentSubject]) $("tutorSubject").value=currentSubject;
+ updateTutorTopics();
+ if(currentTopic && [...$("tutorTopic").options].some(o=>o.value===currentTopic)) $("tutorTopic").value=currentTopic;
+}
+function escapeHTML(value){
+ return String(value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+}
+$("quizSubject").addEventListener("change",updateQuizTopics);
+$("startQuiz").addEventListener("click",()=>beginQuiz($("quizSubject").value,$("quizTopic").value));
+$("tutorSubject").addEventListener("change",()=>{updateTutorTopics();tutorHistory=[];});
+$("tutorTopic").addEventListener("change",()=>{tutorHistory=[];});
+$("gradeSelect").addEventListener("change",()=>{updateTutorTopics();tutorHistory=[];});
+
+function recentQuestionKey(s,t,g){return `novalearn_recent_${g}_${s}_${t}`;}
+function getRecentQuestions(s,t,g){
+ try{return JSON.parse(localStorage.getItem(recentQuestionKey(s,t,g))||"[]").slice(-20);}catch{return [];}
+}
+function rememberQuestions(s,t,g,questions){
+ const recent=getRecentQuestions(s,t,g);
+ const combined=[...recent,...questions.map(q=>q.q)].slice(-20);
+ localStorage.setItem(recentQuestionKey(s,t,g),JSON.stringify(combined));
+}
+async function beginQuiz(s,t){
+ if(quizRequestBusy)return;
+ currentSubject=s;currentTopic=t;
+ quizRequestBusy=true;
+ $("quizArea").innerHTML='<div class="panel quiz-loading"><h3>Creating your topic quiz…</h3><p>Nova AI is preparing five fresh questions for '+escapeHTML(t)+'.</p></div>';
+ try{
+  const grade=$("gradeSelect").value;
+  const recentQuestions=getRecentQuestions(s,t,grade);
+  const response=await fetch("/api/quiz",{
+   method:"POST",headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({subject:s,topic:t,grade,count:5,recentQuestions})
+  });
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||`Quiz request failed (${response.status}).`);
+  if(!Array.isArray(data.questions)||data.questions.length!==5)throw new Error("The quiz response was incomplete. Please try again.");
+  quizQuestions=data.questions.map(q=>({q:q.question,opts:q.options,correct:q.correctIndex,why:q.explanation}));
+  if(quizQuestions.some(q=>!q.q||!Array.isArray(q.opts)||q.opts.length!==4||!Number.isInteger(q.correct)||q.correct<0||q.correct>3))throw new Error("The AI returned an invalid question set. Please try again.");
+  rememberQuestions(s,t,grade,quizQuestions);
+  quizIndex=0;quizScore=0;answered=false;
+  renderQuestion();
+ }catch(error){
+  $("quizArea").innerHTML=`<div class="panel"><h3>Couldn't create the quiz</h3><p class="small">${escapeHTML(error.message)}</p><button class="action" id="retryQuizButton">Try again</button></div>`;
+  $("retryQuizButton").addEventListener("click",()=>beginQuiz(s,t));
+ }finally{quizRequestBusy=false;}
+}
+function renderQuestion(){
+ const q=quizQuestions[quizIndex];
+ if(!q){finishQuiz();return;}
+ answered=false;
+ $("quizArea").innerHTML=`
+  <div class="panel">
+   <div class="small">QUESTION ${quizIndex+1} OF ${quizQuestions.length} · ${escapeHTML(currentSubject)} · ${escapeHTML(currentTopic)}</div>
+   <div class="progress-track" style="margin-top:12px"><div class="progress-fill" style="width:${(quizIndex/quizQuestions.length)*100}%"></div></div>
+   <div class="quiz-question">${escapeHTML(q.q)}</div>
+   <div id="answerOptions">${q.opts.map((v,i)=>`<button class="answer" data-answer="${i}">${escapeHTML(v)}</button>`).join("")}</div>
+   <div id="answerFeedback"></div>
+   <div class="button-row"><button class="action hidden" id="nextQuestion">${quizIndex===quizQuestions.length-1?"Finish quiz":"Next question →"}</button></div>
+  </div>`;
+ document.querySelectorAll(".answer").forEach(b=>b.addEventListener("click",()=>chooseAnswer(Number(b.dataset.answer),b)));
+ $("nextQuestion").addEventListener("click",()=>{quizIndex++;renderQuestion();});
+}
+function chooseAnswer(index,button){
+ if(answered)return;
+ answered=true;
+ const q=quizQuestions[quizIndex];
+ const correct=index===q.correct;
+ if(correct)quizScore++;
+ document.querySelectorAll(".answer").forEach(b=>{
+  const n=Number(b.dataset.answer);
+  if(n===q.correct)b.classList.add("correct");
+  else if(b===button)b.classList.add("wrong");
+  b.disabled=true;
+ });
+ $("answerFeedback").innerHTML=`<div class="feedback ${correct?"good":"bad"}"><b>${correct?"Correct!":"Not quite."}</b><br>${escapeHTML(q.why)}</div>`;
+ $("nextQuestion").classList.remove("hidden");
+}
+function finishQuiz(){
+ state.quizzes++;
+ const earned=quizScore*10;
+ state.xp+=earned;state.coins+=Math.floor(earned/2);
+ saveState();updateStats();
+ $("quizArea").innerHTML=`
+  <div class="panel" style="text-align:center;padding:35px">
+   <div style="font-size:45px">🏆</div>
+   <h2>Quiz completed!</h2>
+   <div style="font-size:35px;font-weight:850;color:var(--primary)">${quizScore}/${quizQuestions.length}</div>
+   <p>You earned ${earned} XP and ${Math.floor(earned/2)} coins.</p>
+   <button class="action" id="newQuizButton">Try again with new questions</button>
+   <button class="secondary" onclick="showPage('dashboard')">Dashboard</button>
+  </div>`;
+ $("newQuizButton").addEventListener("click",()=>beginQuiz(currentSubject,currentTopic));
+}
+
+// -------------------- AI TUTOR CHAT --------------------
+function addChatMessage(role,content){
+ const node=document.createElement("div");
+ node.className=`chat-message ${role}`;
+ node.textContent=content;
+ $("chatMessages").appendChild(node);
+ $("chatMessages").scrollTop=$("chatMessages").scrollHeight;
+}
+async function sendChatMessage(){
+ const question=$("chatInput").value.trim();
+ if(!question)return;
+ const subject=$("tutorSubject").value;
+ const topic=$("tutorTopic").value;
+ const grade=$("gradeSelect").value;
+ $("chatInput").value="";
+ addChatMessage("user",question);
+ $("sendChat").disabled=true;
+ $("chatStatus").textContent="Nova AI is thinking…";
+ try{
+  const response=await fetch("/api/ask",{
+   method:"POST",headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({question,grade,subject,topic,history:tutorHistory.slice(-10)})
+  });
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||`AI request failed (${response.status}).`);
+  const answer=String(data.answer||"").trim();
+  if(!answer)throw new Error("The AI returned an empty answer. Please try again.");
+  addChatMessage("assistant",answer);
+  tutorHistory.push({role:"user",content:question},{role:"assistant",content:answer});
+  tutorHistory=tutorHistory.slice(-12);
+  $("chatStatus").textContent="Answered · Ask another question whenever you're ready.";
+ }catch(error){
+  addChatMessage("assistant",`I couldn't answer that just now. ${error.message}`);
+  $("chatStatus").textContent="Check /api/status, then confirm your API key and API usage access in the server environment.";
+ }finally{$("sendChat").disabled=false;$("chatInput").focus();}
+}
+$("sendChat").addEventListener("click",sendChatMessage);
+$("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendChatMessage();}});
+
+// -------------------- TIPS --------------------
+function renderTips(){
+ const s=$("tipsSubject").value||"Mathematics";
+ $("tipsContent").innerHTML=tips[s].map((t,i)=>`
+  <div class="tip-card"><h3>${["✦","⚠","✓"][i]} ${t[0]}</h3><p>${t[1]}</p></div>`).join("");
+}
+$("tipsSubject").addEventListener("change",renderTips);
+
+// -------------------- PROGRESS --------------------
+function renderProgress(){
+ updateStats();
+ $("progressSubjects").innerHTML=Object.keys(subjects).map(s=>{
+  const p=subjectProgress(s);
+  return `<div style="margin:20px 0"><div class="progress-caption" style="font-size:13px;color:var(--text);margin-bottom:8px"><b>${subjects[s].icon} ${s}</b><span>${p.count}/${p.total} completed</span></div><div class="progress-track"><div class="progress-fill" style="width:${p.percent}%"></div></div></div>`;
+ }).join("");
+}
+
+// -------------------- REWARDS --------------------
+const rewards=[
+ ["🎨","Profile theme","Change your profile theme.",50],
+ ["⭐","XP boost badge","Unlock a learning badge.",100],
+ ["📚","Study champion","A reward for consistent learning.",150],
+ ["🏅","Nova achiever","Show off your progress.",250],
+ ["🚀","Super learner","A special milestone reward.",400],
+ ["👑","Nova legend","The highest shop reward.",600]
+];
+function renderRewards(){
+ $("shopCoins").textContent=state.coins+" coins";
+ $("rewardGrid").innerHTML=rewards.map((r,i)=>`
+  <div class="reward"><div style="font-size:30px">${r[0]}</div><h3>${r[1]}</h3><p>${r[2]}</p><b>${r[3]} coins</b><div style="margin-top:13px"><button class="action" ${state.rewards.includes(i)?"disabled":""} onclick="buyReward(${i})">${state.rewards.includes(i)?"Unlocked ✓":"Unlock"}</button></div></div>`).join("");
+}
+function buyReward(i){
+ if(state.rewards.includes(i))return;
+ if(state.coins<rewards[i][3]){alert("You need more coins to unlock this reward.");return;}
+ state.coins-=rewards[i][3];state.rewards.push(i);saveState();renderRewards();updateStats();
+}
+
+// -------------------- SEARCH --------------------
+$("globalSearch").addEventListener("input",e=>{
+ const value=e.target.value.trim().toLowerCase();
+ if(!value)return;
+ const found=Object.keys(subjects).find(s=>s.toLowerCase().includes(value)||
+  gradeTopics[$("gradeSelect").value][s].some(t=>t.toLowerCase().includes(value)));
+ if(found){
+  openSubject(found);
+  if(!found.toLowerCase().includes(value)){
+   const topics=gradeTopics[$("gradeSelect").value][found].filter(t=>t.toLowerCase().includes(value));
+   $("learnContent").querySelectorAll(".topic-card").forEach(card=>{
+    card.style.display=topics.some(t=>card.textContent.includes(t))?"flex":"none";
+   });
+  }
+ }
+});
+$("globalSearch").addEventListener("keydown",e=>{
+ if(e.key==="Escape"){e.target.value="";renderLearn();}
+});
+
+// -------------------- GRADE CHANGE --------------------
+$("gradeSelect").addEventListener("change",()=>{
+ renderDashboard();
+ if(currentPage==="learn")renderLearn();
+ if(currentPage==="lesson")openLesson(currentSubject,currentTopic);
+ if(currentPage==="progress")renderProgress();
+ if(currentPage==="practice")updateQuizTopics();
+ updateTutorTopics();
+});
+
+
+// Mobile navigation and live backend status.
+document.querySelectorAll("[data-mobile-page]").forEach(button=>button.addEventListener("click",()=>showPage(button.dataset.mobilePage)));
+const novaOriginalShowPage=showPage;showPage=function(page){novaOriginalShowPage(page);document.querySelectorAll("[data-mobile-page]").forEach(item=>item.classList.toggle("active",item.dataset.mobilePage===page));};
+async function checkAIConnection(){const pill=$("apiStatusPill"),label=$("apiStatusText");if(!pill||!label)return;try{const response=await fetch("/api/status",{cache:"no-store"});const data=await response.json();if(!response.ok)throw new Error();if(data.aiConfigured){pill.className="api-pill ready";label.textContent="AI connected";}else{pill.className="api-pill error";label.textContent="API key needed";}}catch{pill.className="api-pill error";label.textContent="Server not connected";}}
+checkAIConnection();
+
+// -------------------- STARTUP --------------------
+fillQuizSelectors();
+renderDashboard();
+updateStats();
+</script>
+</body>
+</html>
